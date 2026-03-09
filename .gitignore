@@ -12,3 +12,7 @@ output*.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Extra folders
+src/
+CP372-A2/
