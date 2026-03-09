@@ -2,14 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-/**
- * DS-FTP Sender - Mars Rover
- * Sends files to Earth Station (Receiver) using Stop-and-Wait or Go-Back-N protocol.
- * 
- * Usage: java Sender <rcv_ip> <rcv_data_port> <sender_ack_port> <input_file> <timeout_ms> [window_size]
- *   - Omit window_size for Stop-and-Wait
- *   - Provide window_size (multiple of 4, <= 128) for Go-Back-N
- */
+// Sender - sends file to receiver using UDP
 public class Sender {
 
     private static final int MAX_TIMEOUTS = 3;

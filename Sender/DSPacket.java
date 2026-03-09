@@ -1,15 +1,6 @@
 import java.nio.ByteBuffer;
 
-/**
- * DS-FTP Packet Wrapper
- * --------------------
- * Handles conversion between protocol fields and raw 128-byte UDP datagrams.
- *
- * All packets:
- * - Are exactly 128 bytes on the wire
- * - Use big-endian encoding for the payload length
- * - Follow the DS-FTP packet contract strictly
- */
+// DSPacket - 128 byte packet format for DS-FTP protocol
 public class DSPacket {
 
     // Fixed packet sizes
@@ -28,17 +19,7 @@ public class DSPacket {
     private short length;   // Payload length in bytes (0–124)
     private byte[] payload;
 
-    /**
-     * Constructor for creating a packet to SEND.
-     *
-     * Usage:
-     * - DATA packets: provide payload bytes (length 1–124)
-     * - SOT / ACK / EOT packets: pass null or empty data
-     *
-     * @param type Packet type (TYPE_SOT, TYPE_DATA, TYPE_ACK, TYPE_EOT)
-     * @param seqNum Sequence number (automatically modulo 128)
-     * @param data Payload bytes (null or empty for control packets)
-     */
+    // Constructor for sending packets
     public DSPacket(byte type, int seqNum, byte[] data) {
         this.type = type;
         this.seqNum = (byte) (seqNum % 128);
@@ -48,12 +29,7 @@ public class DSPacket {
         this.length = (short) this.payload.length;
     }
 
-    /**
-     * Constructor for parsing a RECEIVED 128-byte datagram.
-     *
-     * @param rawBytes The raw byte array from DatagramPacket
-     * @throws IllegalArgumentException if payload length is invalid
-     */
+    // Constructor for parsing received packets
     public DSPacket(byte[] rawBytes) {
 
         ByteBuffer bb = ByteBuffer.wrap(rawBytes);
@@ -73,15 +49,7 @@ public class DSPacket {
         bb.get(this.payload);
     }
 
-    /**
-     * Converts this packet into a fixed-size 128-byte array
-     * suitable for DatagramPacket transmission.
-     *
-     * Note:
-     * - ByteBuffer.allocate() zero-fills unused bytes automatically.
-     *
-     * @return 128-byte array representing the packet
-     */
+    // Convert packet to 128 byte array
     public byte[] toBytes() {
 
         ByteBuffer bb = ByteBuffer.allocate(MAX_PACKET_SIZE);
@@ -95,18 +63,13 @@ public class DSPacket {
         return bb.array();
     }
 
-    // ------------------------
     // Getters
-    // ------------------------
 
     public byte getType() {
         return type;
     }
 
-    /**
-     * Returns the sequence number as an unsigned integer (0–255).
-     * This avoids Java's signed byte interpretation.
-     */
+    // Get sequence number as unsigned int
     public int getSeqNum() {
         return seqNum & 0xFF;
     }

@@ -2,13 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-/**
- * DS-FTP Receiver - Earth Station
- * Receives files from Mars Rover (Sender) using Stop-and-Wait or Go-Back-N protocol.
- * 
- * Usage: java Receiver <sender_ip> <sender_ack_port> <rcv_data_port> <output_file> <RN>
- *   - RN: Reliability Number (0 = no ACK loss, X = every Xth ACK dropped)
- */
+// Receiver - receives file from sender using UDP
 public class Receiver {
 
     private String senderIP;
