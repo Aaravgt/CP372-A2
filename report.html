@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CP372 Assignment 2 Report</title>
+<style>
+    body { font-family: 'Times New Roman', serif; margin: 40px 50px; font-size: 11pt; line-height: 1.4; }
+    h1 { text-align: center; font-size: 16pt; margin-bottom: 5px; }
+    h2 { font-size: 13pt; margin-top: 15px; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header p { margin: 2px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 4px 8px; text-align: center; }
+    th { background-color: #e8e8e8; }
+    p { margin: 5px 0; }
+    .note { font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>CP372 Assignment 2 - Reliable Data Transfer Protocol Report</h1>
+<div class="header">
+    <p><strong>Name:</strong> Aarav | <strong>Course:</strong> CP372 - Computer Networks</p>
+    <p><strong>Date:</strong> March 2, 2026</p>
+</div>
+
+<h2>1. SOT / EOT (Start/End of Transmission)</h2>
+<p>
+The protocol uses <strong>SOT</strong> and <strong>EOT</strong> control packets to manage the connection lifecycle. 
+Before any data is sent, the Sender transmits an SOT packet to the Receiver, which responds with an ACK. 
+This establishes the session similar to a simplified handshake. If the SOT is lost (dropped by ChaosEngine), 
+the Sender retransmits it after the timeout expires. Once all data packets have been sent and acknowledged, 
+the Sender sends an EOT packet signaling the end of the transfer. The Receiver ACKs the EOT and writes 
+the assembled file to disk. Both SOT and EOT are retransmitted on timeout, ensuring reliable session management 
+even under lossy conditions.
+</p>
+
+<h2>2. Protocol Implementation</h2>
+<p>
+<strong>Stop-and-Wait (SAW):</strong> The Sender transmits one data packet and waits for an ACK before 
+sending the next. If the ACK is not received within the timeout, the packet is retransmitted. This is 
+simple but has low throughput since only one packet is in flight at a time.
+</p>
+<p>
+<strong>Go-Back-N (GBN):</strong> The Sender can have up to <em>N</em> unacknowledged packets in the 
+pipeline (window size = N). The Receiver sends cumulative ACKs for the highest in-order sequence number 
+received. On timeout, the Sender "goes back" to the base of the window and retransmits all packets from 
+there. Out-of-order packets are discarded by the Receiver.
+</p>
+
+<h2>3. Performance Results</h2>
+<p>Tested with <code>input.txt</code> (1132 bytes, 3 data packets, 512-byte payload). Each test averaged over 3 runs.</p>
+
+<table>
+    <tr>
+        <th>Protocol</th>
+        <th>Window</th>
+        <th>Chaos</th>
+        <th>Timeout (ms)</th>
+        <th>Avg Retransmissions</th>
+        <th>Avg Time (ms)</th>
+        <th>File Match</th>
+    </tr>
+    <tr>
+        <td>SAW</td><td>1</td><td>0.0</td><td>1000</td>
+        <td>0</td><td>~130</td><td>Yes</td>
+    </tr>
+    <tr>
+        <td>SAW</td><td>1</td><td>0.1</td><td>500</td>
+        <td>~1</td><td>~590</td><td>Yes</td>
+    </tr>
+    <tr>
+        <td>SAW</td><td>1</td><td>0.3</td><td>500</td>
+        <td>~3</td><td>~1700</td><td>Yes</td>
+    </tr>
+    <tr>
+        <td>GBN</td><td>4</td><td>0.0</td><td>1000</td>
+        <td>0</td><td>~90</td><td>Yes</td>
+    </tr>
+    <tr>
+        <td>GBN</td><td>4</td><td>0.1</td><td>500</td>
+        <td>~2</td><td>~1100</td><td>Yes</td>
+    </tr>
+    <tr>
+        <td>GBN</td><td>4</td><td>0.3</td><td>500</td>
+        <td>~5</td><td>~2800</td><td>Yes</td>
+    </tr>
+</table>
+
+<h2>4. Analysis</h2>
+<p>
+With <strong>no chaos (0.0)</strong>, GBN is slightly faster than SAW because all packets in the window are sent 
+at once without waiting. As <strong>chaos increases</strong>, both protocols experience more retransmissions, but 
+GBN's impact is larger because a single lost ACK causes the entire window to be retransmitted. SAW is simpler 
+and wastes fewer retransmissions per loss event, but its baseline throughput is lower. GBN with a larger window 
+outperforms SAW under low-loss conditions, but the advantage shrinks as the chaos factor rises.
+</p>
+
+<h2>5. Parameters</h2>
+<p><strong>Sender:</strong> <code>java Sender &lt;host&gt; &lt;port&gt; &lt;inputFile&gt; &lt;SAW|GBN&gt; &lt;windowSize&gt; &lt;timeout&gt; &lt;chaosFactor&gt;</code></p>
+<p><strong>Receiver:</strong> <code>java Receiver &lt;port&gt; &lt;outputFile&gt; &lt;chaosFactor&gt;</code></p>
+<p class="note">Packet size: 512 bytes max payload. Java serialization used for packet encoding over UDP.</p>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+The quick brown fox jumps over the lazy dog. This is a test file for CP372 Assignment 2.
+It will be sent from the Sender to the Receiver using our reliable data transfer protocol.
+The protocol supports both Stop-and-Wait (SAW) and Go-Back-N (GBN) approaches.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
+ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Line 1: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+Line 2: 0123456789
+Line 3: The sender reads this file, breaks it into packets, and transmits each one.
+Line 4: The receiver collects the packets, reassembles them, and writes to an output file.
+Line 5: We can compare input.txt and output.txt to verify correctness.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+deserunt mollit anim id est laborum.
+
+This is the end of the test file. If the output matches this file exactly, the transfer was successful!

@@ -1,0 +1,9 @@
+Hello Mars! This is a test file for the DS-FTP protocol.
+The file transfer should work correctly with both Stop-and-Wait and Go-Back-N protocols.
+Testing reliable data transfer over UDP.
+Line 4 of test data.
+Line 5 of test data.
+Line 6 of test data.
+Line 7 of test data.
+Line 8 of test data.
+End of test file.

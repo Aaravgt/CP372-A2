@@ -1,0 +1,97 @@
+============================================================
+DS-FTP DEMO COMMANDS - CP372 Assignment 2
+============================================================
+
+IMPORTANT: Run Receiver FIRST in Terminal 1, then Sender in Terminal 2
+
+============================================================
+DEMO 1: STOP-AND-WAIT (No ACK Loss)
+============================================================
+
+--- Terminal 1 (Receiver) ---
+cd "c:\Users\aarav\OneDrive\Desktop\CP372 A2\Receiver"
+java Receiver 127.0.0.1 9877 9876 output_saw.txt 0
+
+--- Terminal 2 (Sender) ---
+cd "c:\Users\aarav\OneDrive\Desktop\CP372 A2\Sender"
+java Sender 127.0.0.1 9876 9877 testfile.txt 1000
+
+--- Verify files match ---
+Compare-Object (Get-Content testfile.txt) (Get-Content ..\Receiver\output_saw.txt)
+
+
+============================================================
+DEMO 2: GO-BACK-N (Window=20, No ACK Loss)
+============================================================
+
+--- Terminal 1 (Receiver) ---
+java Receiver 127.0.0.1 9877 9876 output_gbn.txt 0
+
+--- Terminal 2 (Sender) ---
+java Sender 127.0.0.1 9876 9877 testfile.txt 1000 20
+
+--- Verify files match ---
+Compare-Object (Get-Content testfile.txt) (Get-Content ..\Receiver\output_gbn.txt)
+
+
+============================================================
+DEMO 3: STOP-AND-WAIT WITH ACK LOSS (RN=5)
+============================================================
+
+--- Terminal 1 (Receiver) ---
+java Receiver 127.0.0.1 9877 9876 output_saw_loss.txt 5
+
+--- Terminal 2 (Sender) ---
+java Sender 127.0.0.1 9876 9877 testfile.txt 500
+
+Look for: [DROP] ACK and [TIMEOUT] messages
+
+
+============================================================
+DEMO 4: GO-BACK-N WITH ACK LOSS (Window=20, RN=10)
+============================================================
+
+--- Terminal 1 (Receiver) ---
+java Receiver 127.0.0.1 9877 9876 output_gbn_loss.txt 10
+
+--- Terminal 2 (Sender) ---
+java Sender 127.0.0.1 9876 9877 testfile.txt 500 20
+
+
+============================================================
+WHAT TO POINT OUT IN VIDEO
+============================================================
+
+1. HANDSHAKE:
+   Sender:   [SEND] SOT seq=0
+   Receiver: [RECV] SOT seq=0 → [SEND] ACK seq=0
+   Sender:   [RECV] ACK seq=0 - Handshake complete
+
+2. DATA TRANSFER (Stop-and-Wait):
+   - One packet sent, wait for ACK, then next packet
+
+3. DATA TRANSFER (Go-Back-N):
+   - Multiple packets sent in burst
+   - Cumulative ACKs received
+
+4. ACK LOSS HANDLING:
+   Receiver: [DROP] ACK seq=X (ackCount=Y, RN=Z)
+   Sender:   [TIMEOUT] ... retransmitting
+
+5. TEARDOWN:
+   Sender:   [SEND] EOT seq=X
+   Receiver: [RECV] EOT → [SEND] ACK
+   Sender:   [RECV] ACK - Transfer complete
+   
+6. FILE VERIFICATION:
+   Compare-Object returns nothing = files are identical
+
+
+============================================================
+PORT MAPPING EXPLAINED
+============================================================
+- 9876 = Receiver listens for DATA packets (rcv_data_port)
+- 9877 = Sender listens for ACK packets (sender_ack_port)
+
+Receiver command: java Receiver <sender_ip> <sender_ack_port> <rcv_data_port> <output_file> <RN>
+Sender command:   java Sender <rcv_ip> <rcv_data_port> <sender_ack_port> <input_file> <timeout_ms> [window_size]
